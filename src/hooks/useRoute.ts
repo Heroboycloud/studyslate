@@ -11,7 +11,7 @@ function parseHash(): Route {
   const params = new URLSearchParams(queryString || '');
   
   // Normalize path
-  let name = path.replace(/^\//, '').replace(/\/$/, '') || 'home';
+  let name = path.replace(/^\/|\/saved$/, '').replace(/\/$/, '') || 'home';
   
   return { name, params };
 }

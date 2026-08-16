@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useAi, useRoute } from '../hooks';
-import { Chalkdown } from '../components';
-import { ModelOption } from '../types';
+import React, { useEffect, useState } from 'react';
+import { useAi, useRoute, useSavedResults } from '../hooks';
+import { OutputBoard } from '../components';
+import { ModelOption, ToolType } from '../types';
 
 const difficulties = ['Warm-up', 'Exam level', 'Brutal'];
 const questionTypes = ['Multiple choice', 'True/false', 'Short answer', 'Fill-in-the-blank'];
@@ -9,6 +9,7 @@ const defaultModel: ModelOption = 'openai/gpt-5.4-nano';
 
 export function Questions() {
   const { route } = useRoute();
+  const { saveResult } = useSavedResults();
   const { status, output, error, run, reset, setOutput, setStatus } = useAi();
   
   const [topic, setTopic] = React.useState('');
@@ -18,6 +19,7 @@ export function Questions() {
   const [hideAnswers, setHideAnswers] = React.useState(true);
   const [model, setModel] = React.useState<ModelOption>(defaultModel);
   const [lastPrompt, setLastPrompt] = React.useState('');
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const topicParam = route.params.get('topic');
@@ -60,6 +62,32 @@ Generate ${count} ${difficulty.toLowerCase()} ${selectedTypes.join('/').toLowerC
 
   const handleClear = () => { reset(); setTopic(''); };
   const handleCopy = () => { navigator.clipboard.writeText(output); };
+
+  const handleSave = () => {
+    if (output && topic) {
+      saveResult('questions' as ToolType, topic, output, model);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!output || !topic) return;
+    const result = {
+      tool: 'questions',
+      topic,
+      content: output,
+      model,
+      createdAt: Date.now(),
+    };
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `studyslate-questions-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Split output at Answer Key for flap rendering
   const parts = output.split(/##\s*Answer Key/i);

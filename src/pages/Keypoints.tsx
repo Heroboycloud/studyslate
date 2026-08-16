@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useAi, useRoute } from '../hooks';
+import React, { useEffect, useState } from 'react';
+import { useAi, useRoute, useSavedResults } from '../hooks';
 import { OutputBoard } from '../components';
-import { ModelOption } from '../types';
+import { ModelOption, ToolType } from '../types';
 
 const goals = ['Quick skim', 'Deep dive'];
 const formats = ['Bullets', 'Cornell outline', 'Mind-map tree', 'Timeline'];
@@ -9,6 +9,7 @@ const defaultModel: ModelOption = 'openai/gpt-5.4-nano';
 
 export function Keypoints() {
   const { route } = useRoute();
+  const { saveResult } = useSavedResults();
   const { status, output, error, run, reset, setOutput, setStatus } = useAi();
   
   const [material, setMaterial] = React.useState('');
@@ -17,6 +18,7 @@ export function Keypoints() {
   const [flagTraps, setFlagTraps] = React.useState(false);
   const [model, setModel] = React.useState<ModelOption>(defaultModel);
   const [lastPrompt, setLastPrompt] = React.useState('');
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const topicParam = route.params.get('topic');
@@ -58,6 +60,32 @@ Please extract the essential information in the requested format. ${flagTraps ? 
 
   const handleCopy = () => {
     navigator.clipboard.writeText(output);
+  };
+
+  const handleSave = () => {
+    if (output && material) {
+      saveResult('keypoints' as ToolType, material.slice(0, 100), output, model);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!output || !material) return;
+    const result = {
+      tool: 'keypoints',
+      topic: material.slice(0, 100),
+      content: output,
+      model,
+      createdAt: Date.now(),
+    };
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `studyslate-keypoints-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -123,7 +151,18 @@ Please extract the essential information in the requested format. ${flagTraps ? 
           </div>
 
           <div>
-            <OutputBoard status={status} output={output} error={error} onCopy={handleCopy} onAgain={handleAgain} onClear={handleClear} onRegenerate={handleAgain} />
+            <OutputBoard
+              status={status}
+              output={output}
+              error={error}
+              onCopy={handleCopy}
+              onAgain={handleAgain}
+              onClear={handleClear}
+              onRegenerate={handleAgain}
+              onSave={handleSave}
+              onDownload={handleDownload}
+              saved={saved}
+            />
           </div>
         </div>
       </div>

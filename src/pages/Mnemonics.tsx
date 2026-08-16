@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useAi, useRoute } from '../hooks';
+import React, { useEffect, useState } from 'react';
+import { useAi, useRoute, useSavedResults } from '../hooks';
 import { OutputBoard } from '../components';
-import { ModelOption } from '../types';
+import { ModelOption, ToolType } from '../types';
 
 const techniques = ['Surprise me', 'Acronym', 'Acrostic', 'Story', 'Memory palace', 'Rhyme-song'];
 const levels = ['High school', 'Undergraduate', 'Graduate', 'Professional'];
@@ -9,6 +9,7 @@ const defaultModel: ModelOption = 'openai/gpt-5.4-nano';
 
 export function Mnemonics() {
   const { route } = useRoute();
+  const { saveResult } = useSavedResults();
   const { status, output, error, run, reset, setOutput, setStatus } = useAi();
   
   const [topic, setTopic] = React.useState('');
@@ -17,6 +18,7 @@ export function Mnemonics() {
   const [level, setLevel] = React.useState('Undergraduate');
   const [model, setModel] = React.useState<ModelOption>(defaultModel);
   const [lastPrompt, setLastPrompt] = React.useState('');
+  const [saved, setSaved] = useState(false);
 
   // Prefill from URL params
   useEffect(() => {
@@ -65,6 +67,32 @@ Format your response with clear headings and bullet points.`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(output);
+  };
+
+  const handleSave = () => {
+    if (output && topic) {
+      saveResult('mnemonics' as ToolType, topic, output, model);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!output || !topic) return;
+    const result = {
+      tool: 'mnemonics',
+      topic,
+      content: output,
+      model,
+      createdAt: Date.now(),
+    };
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `studyslate-mnemonics-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const exampleItems = "Mitosis phases: Prophase, Metaphase, Anaphase, Telophase";
@@ -192,6 +220,9 @@ Format your response with clear headings and bullet points.`;
               onAgain={handleAgain}
               onClear={handleClear}
               onRegenerate={handleAgain}
+              onSave={handleSave}
+              onDownload={handleDownload}
+              saved={saved}
             />
           </div>
         </div>

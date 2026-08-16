@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navbar, Footer } from './components';
-import { Home, Mnemonics, Keypoints, Questions, Flashcards, Simplify } from './pages';
+import { Home, Mnemonics, Keypoints, Questions, Flashcards, Simplify, SavedResults } from './pages';
 import { useRoute } from './hooks';
 import { waitForPuter } from './lib/puter';
 
@@ -24,6 +24,7 @@ function App() {
       case 'questions': return <Questions />;
       case 'flashcards': return <Flashcards />;
       case 'simplify': return <Simplify />;
+      case 'saved': return <SavedResults />;
       default: return <Home />;
     }
   };
