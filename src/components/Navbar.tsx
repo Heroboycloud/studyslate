@@ -7,6 +7,7 @@ const navLinks = [
   { name: 'questions', label: 'Questions', path: '/questions' },
   { name: 'flashcards', label: 'Flashcards', path: '/flashcards' },
   { name: 'simplify', label: 'Simplify', path: '/simplify' },
+  { name: 'saved', label: 'Saved', path: '/saved' },
 ];
 
 export function Navbar() {
