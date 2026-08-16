@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useAi, useRoute } from '../hooks';
-import { Chalkdown } from '../lib';
 import { ModelOption, Flashcard } from '../types';
 
 const cardStyles = ['Definitions', 'Q&A', 'Cloze', 'Mix'];
@@ -17,7 +16,6 @@ export function Flashcards() {
   const [lastPrompt, setLastPrompt] = React.useState('');
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [flipped, setFlipped] = useState<Set<number>>(new Set());
-  const [shuffleSeed, setShuffleSeed] = useState(0);
 
   useEffect(() => {
     const topicParam = route.params.get('topic');
@@ -96,7 +94,6 @@ Each card must have "q" and "a" keys with string values.`;
   const shuffleCards = () => {
     setCards(prev => [...prev].sort(() => Math.random() - 0.5));
     setFlipped(new Set());
-    setShuffleSeed(prev => prev + 1);
   };
 
   const revealedCount = flipped.size;

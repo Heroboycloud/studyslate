@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAi, useRoute } from '../hooks';
-import { OutputBoard, Chalkdown } from '../components';
+import { OutputBoard } from '../components';
 import { ModelOption } from '../types';
 
 const audiences = [

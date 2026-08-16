@@ -1,5 +1,3 @@
-import React from 'react';
-
 const toolLinks = [
   { label: 'Mnemonics', path: '/mnemonics' },
   { label: 'Key Points', path: '/keypoints' },
