@@ -5,7 +5,7 @@ import { useRoute } from './hooks';
 import { waitForPuter } from './lib/puter';
 
 function App() {
-  const { route, navigate } = useRoute();
+  const { route } = useRoute();
   const [puterReady, setPuterReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
