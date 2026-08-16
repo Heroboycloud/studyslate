@@ -8,7 +8,7 @@ const levels = ['High school', 'Undergraduate', 'Graduate', 'Professional'];
 const defaultModel: ModelOption = 'openai/gpt-5.4-nano';
 
 export function Mnemonics() {
-  const { route, navigate } = useRoute();
+  const { route } = useRoute();
   const { status, output, error, run, reset, setOutput, setStatus } = useAi();
   
   const [topic, setTopic] = React.useState('');

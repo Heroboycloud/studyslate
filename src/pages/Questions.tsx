@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAi, useRoute } from '../hooks';
-import { OutputBoard, Chalkdown } from '../components';
+import { Chalkdown } from '../components';
 import { ModelOption } from '../types';
 
 const difficulties = ['Warm-up', 'Exam level', 'Brutal'];

@@ -1,4 +1,3 @@
-import React from 'react';
 import { AiStatus } from '../types';
 import { Chalkdown } from '../lib';
 
