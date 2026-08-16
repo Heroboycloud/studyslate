@@ -2,66 +2,74 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
+# Build outputs
 dist/
 build/
-*.bundle.js
-*.bundle.css
+coverage/
+htmlcov/
+*.log
 
 # Environment variables
 .env
 .env.local
 .env.*
 
-# IDE and editor files
+# Editor/IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *.tmp
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Coverage
-coverage/
-htmlcov/
-
-# Python cache
+# Python specific
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Distribution / packaging
 .Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
+*.so
+*.egg-info/
+.eggs/
+.mypy_cache/
+.pytest_cache/
 .tox/
 .coverage
-.nyc_output/
-istanbul.out
 
-# Testing
-.hypothesis/
-*.hypothesis.*
+# Compiled files
+*.class
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
-# Sensitive files
-config/secrets.yml
-secrets.json
+# OS generated files
+.DS_Store
+Thumbs.db
 
-# Browserslist and caniuse-lite
-node_modules/caniuse-lite/
-node_modules/browserslist/
-
-# Vite specific
-!.vite/
-vite.config.js.timestamp*
+# Archives
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
