@@ -1,0 +1,67 @@
+```
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+*.bundle.js
+*.bundle.css
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.nyc_output/
+istanbul.out
+
+# Testing
+.hypothesis/
+*.hypothesis.*
+
+# Sensitive files
+config/secrets.yml
+secrets.json
+
+# Browserslist and caniuse-lite
+node_modules/caniuse-lite/
+node_modules/browserslist/
+
+# Vite specific
+!.vite/
+vite.config.js.timestamp*
+```
