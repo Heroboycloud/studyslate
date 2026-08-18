@@ -10,8 +10,8 @@ function parseHash(): Route {
   const [path, queryString] = hash.split('?');
   const params = new URLSearchParams(queryString || '');
   
-  // Normalize path
-  let name = path.replace(/^\/|\/saved$/, '').replace(/\/$/, '') || 'home';
+  // Normalize path - handle all routes properly
+  let name = path.replace(/^\//, '').replace(/\/$/, '') || 'home';
   
   return { name, params };
 }

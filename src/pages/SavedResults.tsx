@@ -1,49 +1,11 @@
-import React, { useState } from 'react';
-import { useSavedResults } from '../hooks';
-import { Chalkdown } from '../lib';
-import { SavedResult } from '../types';
-
-const toolIcons: Record<string, string> = {
-  mnemonics: '🧠',
-  keypoints: '📌',
-  questions: '✏️',
-  flashcards: '🃏',
-  simplify: '✨',
-};
-
-const toolNames: Record<string, string> = {
-  mnemonics: 'Mnemonic Maker',
-  keypoints: 'Key Point Distiller',
-  questions: 'Exam Question Generator',
-  flashcards: 'Flashcard Forge',
-  simplify: 'Concept Simplifier',
-};
+import { useState } from 'react';
+import { useRoute } from '../hooks';
+import { useSavedResults, SavedResult } from '../hooks/useSavedResults';
+import { Chalkdown } from '../lib/chalkdown';
 
 export function SavedResults() {
-  const { results, deleteResult, clearAll, exportResults, importResults } = useSavedResults();
-  const [selectedResult, setSelectedResult] = useState<SavedResult | null>(null);
-  const [importError, setImportError] = useState<string>('');
-
-  const handleExport = () => {
-    exportResults();
-  };
-
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      const success = importResults(content);
-      if (!success) {
-        setImportError('Failed to import. Please check the file format.');
-      } else {
-        setImportError('');
-      }
-    };
-    reader.readAsText(file);
-  };
+  const { navigate } = useRoute();
+  const { results, isLoaded, deleteResult, clearAll, downloadMarkdown } = useSavedResults();
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -55,185 +17,150 @@ export function SavedResults() {
     });
   };
 
-  const handleDownloadSingle = (result: SavedResult) => {
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `studyslate-${result.tool}-${result.createdAt}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const getToolIcon = (tool: string) => {
+    switch (tool) {
+      case 'mnemonics': return '🧠';
+      case 'keypoints': return '📌';
+      case 'questions': return '❓';
+      case 'flashcards': return '🃏';
+      case 'simplify': return '✨';
+      default: return '📚';
+    }
   };
 
-  const handleCopyContent = (content: string) => {
-    navigator.clipboard.writeText(content);
-  };
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading saved results...</div>
+      </div>
+    );
+  }
 
   if (results.length === 0) {
     return (
-      <div className="min-h-screen py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-display font-bold text-chalk-white mb-8">
-            📚 Saved Results
-          </h1>
-          
-          <div className="bg-chalkboard-dark/50 rounded-xl p-12 border border-chalk-fog/20 text-center">
-            <svg className="w-20 h-20 mx-auto mb-6 opacity-50" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="20" y="20" width="60" height="60" rx="8" strokeDasharray="8 4" />
-              <path d="M35 40 L65 40" strokeLinecap="round" />
-              <path d="M35 55 L65 55" strokeLinecap="round" />
-              <path d="M35 70 L55 70" strokeLinecap="round" />
-            </svg>
-            <p className="font-hand text-2xl text-chalk-fog mb-4">No saved results yet</p>
-            <p className="text-chalk-fog/60 mb-6">
-              Generate content using any tool and click the Save button to store it here.
-            </p>
-            <a href="#/" className="btn-primary inline-block">
-              Start Creating
-            </a>
-          </div>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
+        <div className="w-24 h-24 mb-6 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center border border-slate-700 shadow-xl">
+          <svg className="w-12 h-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
         </div>
+        <h2 className="text-2xl font-display font-bold text-white mb-2">No saved results yet</h2>
+        <p className="text-slate-400 text-center mb-6 max-w-md">
+          Generate content using any tool and click the Save button to store it here for later access.
+        </p>
+        <button onClick={() => navigate('/')} className="btn-primary px-6 py-3">
+          Start Creating
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-display font-bold text-chalk-white">
-            📚 Saved Results
-          </h1>
-          
-          <div className="flex flex-wrap gap-3">
-            <label className="btn-secondary text-sm py-2 px-4 cursor-pointer flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-              Import
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImport}
-                className="hidden"
-              />
-            </label>
-            <button onClick={handleExport} className="btn-secondary text-sm py-2 px-4 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              Export All
-            </button>
-            <button onClick={clearAll} className="btn-secondary text-sm py-2 px-4 flex items-center gap-2 text-chalk-poppy hover:text-chalk-poppy">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              Clear All
-            </button>
-          </div>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-white mb-2">Saved Results</h1>
+          <p className="text-slate-400">Your personal study library ({results.length} items)</p>
         </div>
-
-        {importError && (
-          <div className="bg-chalk-poppy/20 border border-chalk-poppy rounded-lg p-4 mb-6">
-            <p className="text-chalk-poppy text-sm">{importError}</p>
-          </div>
-        )}
-
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          {results.map((result) => (
-            <div
-              key={result.id}
-              className={`bg-chalkboard-dark/50 rounded-xl p-5 border transition-all duration-200 cursor-pointer hover:border-chalk-yellow/50 hover:shadow-lg ${
-                selectedResult?.id === result.id ? 'border-chalk-yellow bg-chalkboard-lighter/30' : 'border-chalk-fog/20'
-              }`}
-              onClick={() => setSelectedResult(result)}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{toolIcons[result.tool]}</span>
-                  <div>
-                    <p className="font-mono text-xs text-chalk-fog uppercase">{toolNames[result.tool]}</p>
-                    <p className="font-hand text-lg text-chalk-white truncate max-w-[180px]">{result.topic || 'Untitled'}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <p className="text-xs text-chalk-fog/60 mb-4">{formatDate(result.createdAt)}</p>
-              
-              <p className="text-sm text-chalk-fog/80 line-clamp-3 mb-4">
-                {result.content.slice(0, 150)}...
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-chalk-glacier/80 bg-chalk-glacier/10 px-2 py-1 rounded">
-                  {result.model.split('/')[1]}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteResult(result.id);
-                  }}
-                  className="text-chalk-poppy/60 hover:text-chalk-poppy transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Detail View */}
-        {selectedResult && (
-          <div className="bg-paper-base rounded-xl p-6 shadow-lg border border-chalk-fog/20">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{toolIcons[selectedResult.tool]}</span>
-                <div>
-                  <p className="font-mono text-xs text-chalk-fog uppercase">{toolNames[selectedResult.tool]}</p>
-                  <h2 className="font-hand text-2xl text-paper-ink">{selectedResult.topic || 'Untitled'}</h2>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleCopyContent(selectedResult.content)}
-                  className="btn-secondary text-sm py-1 px-3 flex items-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                  Copy
-                </button>
-                <button
-                  onClick={() => handleDownloadSingle(selectedResult)}
-                  className="btn-secondary text-sm py-1 px-3 flex items-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                  Download
-                </button>
-                <button
-                  onClick={() => setSelectedResult(null)}
-                  className="btn-secondary text-sm py-1 px-3"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-            
-            <div className="prose prose-invert max-w-none text-paper-ink">
-              <Chalkdown content={selectedResult.content} />
-            </div>
-            
-            <div className="mt-6 pt-4 border-t border-chalk-fog/20 flex items-center justify-between">
-              <p className="text-xs text-chalk-fog/60">
-                Created: {formatDate(selectedResult.createdAt)} • Model: {selectedResult.model}
-              </p>
-              <button
-                onClick={() => {
-                  deleteResult(selectedResult.id);
-                  setSelectedResult(null);
-                }}
-                className="text-chalk-poppy hover:text-chalk-poppy text-sm flex items-center gap-1"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                Delete
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={clearAll}
+          className="px-4 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-lg transition-all duration-200 border border-red-500/30 hover:border-red-500/50 text-sm font-medium"
+        >
+          Clear All
+        </button>
       </div>
+
+      <div className="grid gap-4">
+        {results.map((result) => (
+          <SavedResultCard
+            key={result.id}
+            result={result}
+            onDelete={() => deleteResult(result.id)}
+            onDownload={() => downloadMarkdown(result)}
+            formatDate={formatDate}
+            getToolIcon={getToolIcon}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SavedResultCard({
+  result,
+  onDelete,
+  onDownload,
+  formatDate,
+  getToolIcon,
+}: {
+  result: SavedResult;
+  onDelete: () => void;
+  onDownload: () => void;
+  formatDate: (ts: number) => string;
+  getToolIcon: (tool: string) => string;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-slate-700/50 overflow-hidden shadow-lg hover:shadow-xl hover:border-cyan-500/30 transition-all duration-300">
+      <div className="p-6 border-b border-slate-700/50">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4 flex-1">
+            <div className="text-4xl">{getToolIcon(result.tool)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs font-medium uppercase tracking-wide">
+                  {result.tool}
+                </span>
+                <span className="text-slate-500 text-sm">{formatDate(result.timestamp)}</span>
+                <span className="text-slate-600 text-sm">•</span>
+                <span className="text-slate-500 text-sm">{result.model}</span>
+              </div>
+              <h3 className="text-lg font-semibold text-white truncate mb-2">{result.topic}</h3>
+              <p className="text-slate-400 text-sm line-clamp-2">
+                {result.content.slice(0, 200)}{result.content.length > 200 ? '...' : ''}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+              title={isExpanded ? 'Collapse' : 'Expand'}
+            >
+              <svg className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={onDownload}
+              className="p-2 hover:bg-cyan-900/30 rounded-lg transition-colors text-cyan-400 hover:text-cyan-300"
+              title="Download as Markdown"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-2 hover:bg-red-900/30 rounded-lg transition-colors text-red-400 hover:text-red-300"
+              title="Delete"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="p-6 bg-slate-800/30">
+          <div className="prose prose-invert max-w-none">
+            <Chalkdown content={result.content} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

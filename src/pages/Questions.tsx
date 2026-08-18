@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAi, useRoute, useSavedResults } from '../hooks';
-import { OutputBoard } from '../components';
+import { Chalkdown } from '../components';
 import { ModelOption, ToolType } from '../types';
 
 const difficulties = ['Warm-up', 'Exam level', 'Brutal'];
@@ -19,7 +19,6 @@ export function Questions() {
   const [hideAnswers, setHideAnswers] = React.useState(true);
   const [model, setModel] = React.useState<ModelOption>(defaultModel);
   const [lastPrompt, setLastPrompt] = React.useState('');
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const topicParam = route.params.get('topic');
@@ -66,8 +65,6 @@ Generate ${count} ${difficulty.toLowerCase()} ${selectedTypes.join('/').toLowerC
   const handleSave = () => {
     if (output && topic) {
       saveResult('questions' as ToolType, topic, output, model);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
     }
   };
 
@@ -167,8 +164,10 @@ Generate ${count} ${difficulty.toLowerCase()} ${selectedTypes.join('/').toLowerC
                   ) : answerKeyPart && (
                     <div className="mt-6 border-t border-chalk-fog/20 pt-4"><Chalkdown content={answerKeyPart} /></div>
                   )}
-                  {status === 'done' && <div className="flex gap-2 mt-6 pt-4 border-t border-chalk-fog/20">
+                  {status === 'done' && <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-chalk-fog/20">
                     <button onClick={handleCopy} className="btn-secondary text-sm py-1 px-3">📋 Copy</button>
+                    <button onClick={handleSave} className="btn-secondary text-sm py-1 px-3">💾 Save</button>
+                    <button onClick={handleDownload} className="btn-secondary text-sm py-1 px-3">⬇️ Download</button>
                     <button onClick={handleAgain} className="btn-secondary text-sm py-1 px-3">🔄 Again</button>
                     <button onClick={handleClear} className="btn-secondary text-sm py-1 px-3">🗑 Clear</button>
                   </div>}
