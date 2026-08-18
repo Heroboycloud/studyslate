@@ -3,80 +3,116 @@
 @tailwind utilities;
 
 :root {
+  /* Deep Study Mood Palette - Dark Modern */
+  --bg-deep: #020617;       /* Slate 950 */
+  --bg-surface: #0f172a;    /* Slate 900 */
+  --bg-card: #1e293b;       /* Slate 800 */
+  --bg-input: #334155;      /* Slate 700 */
+  
+  --text-primary: #f8fafc;  /* Slate 50 */
+  --text-secondary: #94a3b8;/* Slate 400 */
+  --text-muted: #64748b;    /* Slate 500 */
+  
+  /* Glow Accents */
+  --accent-primary: #38bdf8; /* Sky 400 */
+  --accent-glow: rgba(56, 189, 248, 0.15);
+  --accent-secondary: #a78bfa; /* Violet 400 */
+  --accent-success: #34d399;   /* Emerald 400 */
+  --accent-warning: #fbbf24;   /* Amber 400 */
+  --accent-danger: #f87171;    /* Red 400 */
+
+  /* Borders & Shadows */
+  --border-subtle: rgba(148, 163, 184, 0.1);
+  --shadow-glow: 0 0 20px -5px var(--accent-glow);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  
   font-family: 'Atkinson Hyperlegible', sans-serif;
-  background-color: #08211B;
-  color: #F1EEE1;
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  background: radial-gradient(circle at 50% -20%, #1e293b, var(--bg-deep));
+  overflow-x: hidden;
 }
 
-/* Custom scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #0C2B24;
-  border-radius: 4px;
+  background: var(--bg-deep);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #1D5546;
+  background: var(--bg-input);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #16453A;
+  background: var(--text-muted);
 }
 
 /* Focus visible outline */
 :focus-visible {
-  outline: 2px solid #F2CE68;
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
+}
+
+/* Utility Classes for Mood Lighting */
+.glow-text {
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+.glow-border {
+  box-shadow: 0 0 15px -3px var(--accent-glow);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.card-dark {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
 }
 
 /* Chip pill styles */
 .chip {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer border border-dashed border-chalk-fog/30 hover:border-chalk-yellow/50 hover:bg-chalk-yellow/10;
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer border border-dashed border-white/10 hover:border-sky-500/50 hover:bg-sky-500/10;
 }
 
 .chip-selected {
-  @apply bg-chalk-yellow/20 border-chalk-yellow text-chalk-white;
+  @apply bg-sky-500/20 border-sky-500 text-white;
 }
 
-/* Hard offset shadow button */
+/* Modern Button Styles */
 .btn-primary {
-  @apply bg-chalk-yellow text-chalkboard-base font-bold py-2 px-4 rounded shadow-[4px_4px_0_0_#0C2B24] hover:shadow-[2px_2px_0_0_#0C2B24] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150;
+  @apply bg-gradient-to-r from-sky-500 to-violet-500 text-white font-bold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl hover:from-sky-400 hover:to-violet-400 transition-all duration-200;
 }
 
 .btn-secondary {
-  @apply bg-chalkboard-lighter text-chalk-white font-medium py-2 px-4 rounded border-2 border-dashed border-chalk-fog/30 hover:border-chalk-yellow/50 transition-all duration-200;
+  @apply bg-slate-800 text-slate-200 font-medium py-2 px-4 rounded-lg border border-slate-700 hover:border-sky-500/50 hover:bg-slate-700 transition-all duration-200;
 }
 
-/* Chalk dots loader */
-.chalk-dots {
+/* Modern Loading Dots */
+.loading-dots {
   display: flex;
   gap: 6px;
   align-items: center;
 }
 
-.chalk-dots span {
+.loading-dots span {
   width: 8px;
   height: 8px;
-  background: #F1EEE1;
+  background: var(--accent-primary);
   border-radius: 50%;
-  animation: chalkDot 1.4s ease-in-out infinite;
+  animation: modernDot 1.4s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--accent-primary);
 }
 
-.chalk-dots span:nth-child(2) { animation-delay: 0.2s; }
-.chalk-dots span:nth-child(3) { animation-delay: 0.4s; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-@keyframes chalkDot {
+@keyframes modernDot {
   0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
   40% { transform: scale(1); opacity: 1; }
 }
@@ -85,6 +121,7 @@ body {
 .caret::after {
   content: '|';
   animation: blink 1s step-end infinite;
+  color: var(--accent-primary);
 }
 
 @keyframes blink {
@@ -134,23 +171,23 @@ body {
   transform: translateY(0);
 }
 
-/* Details element styling */
+/* Modern Details element styling */
 details {
-  @apply border border-dashed border-chalk-fog/30 rounded-lg p-4 transition-all duration-200;
+  @apply border border-slate-700 rounded-lg p-4 transition-all duration-200 bg-slate-900/50;
 }
 
 details:hover {
-  @apply border-chalk-yellow/50 bg-chalkboard-dark/50;
+  @apply border-sky-500/50 bg-slate-800/50;
 }
 
 summary {
-  @apply cursor-pointer font-semibold text-chalk-white list-none flex justify-between items-center;
+  @apply cursor-pointer font-semibold text-slate-100 list-none flex justify-between items-center;
 }
 
 summary::after {
   content: '+';
   font-size: 1.5rem;
-  color: #F2CE68;
+  color: var(--accent-primary);
 }
 
 details[open] summary::after {

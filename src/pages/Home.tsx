@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useRoute } from '../hooks';
+import { useSavedResults } from '../hooks/useSavedResults';
 
 const subjects = [
   'Biology', 'Chemistry', 'Physics', 'History', 'Literature', 
@@ -7,17 +8,21 @@ const subjects = [
 ];
 
 const toolCards = [
-  { name: 'mnemonics', title: 'Mnemonic Maker', desc: 'Memory tricks that stick', icon: '🧠' },
-  { name: 'keypoints', title: 'Key Point Distiller', desc: 'Extract the essentials', icon: '✨' },
-  { name: 'questions', title: 'Exam Question Generator', desc: 'Practice makes perfect', icon: '📝' },
-  { name: 'flashcards', title: 'Flashcard Forge', desc: 'Flip your way to mastery', icon: '🃏' },
-  { name: 'simplify', title: 'Concept Simplifier', desc: 'Explain it like Im 5', icon: '💡' },
+  { name: 'mnemonics', title: 'Mnemonic Maker', desc: 'Memory tricks that stick', icon: '🧠', color: 'from-pink-500 to-rose-500' },
+  { name: 'keypoints', title: 'Key Point Distiller', desc: 'Extract the essentials', icon: '✨', color: 'from-cyan-500 to-blue-500' },
+  { name: 'questions', title: 'Exam Question Generator', desc: 'Practice makes perfect', icon: '📝', color: 'from-violet-500 to-purple-500' },
+  { name: 'flashcards', title: 'Flashcard Forge', desc: 'Flip your way to mastery', icon: '🃏', color: 'from-amber-500 to-orange-500' },
+  { name: 'simplify', title: 'Concept Simplifier', desc: 'Explain it like Im 5', icon: '💡', color: 'from-emerald-500 to-green-500' },
 ];
 
 export function Home() {
   const { navigate } = useRoute();
   const [topic, setTopic] = React.useState('');
   const svgRef = useRef<SVGSVGElement>(null);
+  const { results } = useSavedResults();
+
+  // Get the 3 most recent saved items
+  const recentItems = results.slice(0, 3);
 
   useEffect(() => {
     // Trigger SVG draw animation on mount
@@ -102,6 +107,43 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      {/* Recent Studies Section - Only show if items exist */}
+      {recentItems.length > 0 && (
+        <section className="py-12 px-4 bg-gradient-to-b from-transparent to-chalkboard-lighter/30">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-display font-bold text-chalk-white flex items-center gap-2">
+                <span className="text-chalk-yellow">⏳</span> Recent Studies
+              </h2>
+              <a href="#/saved" className="text-chalk-fog hover:text-chalk-mint transition-colors text-sm font-mono">
+                View all →
+              </a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {recentItems.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="group relative bg-chalkboard-lighter rounded-lg p-5 border border-chalk-fog/20 hover:border-chalk-yellow/40 transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+                  onClick={() => window.location.hash = '#/saved'}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-2xl">{item.toolIcon || '📚'}</span>
+                    <span className="text-xs text-chalk-fog font-mono">{new Date(item.timestamp).toLocaleDateString()}</span>
+                  </div>
+                  <h3 className="font-bold text-chalk-white mb-1 truncate">{item.topic || 'Untitled Topic'}</h3>
+                  <p className="text-xs text-chalk-fog mb-3 line-clamp-2">{item.model}</p>
+                  <div className="flex gap-2">
+                    <span className="text-xs bg-chalkboard-dark/50 hover:bg-chalkboard-dark text-chalk-fog hover:text-chalk-white px-3 py-1.5 rounded-md transition-colors">
+                      View Result
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Subject Ticker */}
       <section className="py-6 border-y border-chalk-fog/20 overflow-hidden">
@@ -224,8 +266,8 @@ export function Home() {
             <details className="group">
               <summary>Is my study data saved anywhere?</summary>
               <p className="mt-3 text-chalk-fog text-sm leading-relaxed">
-                No. StudySlate is stateless — nothing is saved to servers. If you refresh the page, your inputs and outputs will be lost. 
-                Use the Copy button to save important results!
+                You can now save your results locally! Click the 💾 Save button on any result to store it in your browser. 
+                Visit the Saved page to view, download, or delete your saved studies anytime.
               </p>
             </details>
             <details className="group">
