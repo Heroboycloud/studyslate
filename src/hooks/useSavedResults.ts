@@ -1,81 +1,70 @@
-import { useState, useCallback } from 'react';
-import { SavedResult, ToolType } from '../types';
+import { useState, useEffect } from 'react';
+
+export interface SavedResult {
+  id: string;
+  tool: string;
+  topic: string;
+  content: string;
+  timestamp: number;
+  model: string;
+}
 
 const STORAGE_KEY = 'studyslate_saved_results';
 
 export function useSavedResults() {
-  const [results, setResults] = useState<SavedResult[]>(() => {
+  const [results, setResults] = useState<SavedResult[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
+      if (stored) {
+        setResults(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Failed to load saved results', e);
     }
-  });
+    setIsLoaded(true);
+  }, []);
 
-  const saveResult = useCallback((tool: ToolType, topic: string, content: string, model: string) => {
+  const saveResult = (tool: string, topic: string, content: string, model: string) => {
     const newResult: SavedResult = {
       id: crypto.randomUUID(),
       tool,
       topic: topic.slice(0, 100),
       content,
-      createdAt: Date.now(),
+      timestamp: Date.now(),
       model,
     };
     
-    setResults(prev => {
-      const updated = [newResult, ...prev];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-    
-    return newResult;
-  }, []);
+    const updated = [newResult, ...results];
+    setResults(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return newResult.id;
+  };
 
-  const deleteResult = useCallback((id: string) => {
-    setResults(prev => {
-      const updated = prev.filter(r => r.id !== id);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
+  const deleteResult = (id: string) => {
+    const updated = results.filter(r => r.id !== id);
+    setResults(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  };
 
-  const clearAll = useCallback(() => {
+  const clearAll = () => {
     setResults([]);
     localStorage.removeItem(STORAGE_KEY);
-  }, []);
-
-  const exportResults = useCallback(() => {
-    const dataStr = JSON.stringify(results, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `studyslate-export-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, [results]);
-
-  const importResults = useCallback((jsonString: string) => {
-    try {
-      const imported = JSON.parse(jsonString) as SavedResult[];
-      if (Array.isArray(imported)) {
-        setResults(imported);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
-        return true;
-      }
-      return false;
-    } catch {
-      return false;
-    }
-  }, []);
-
-  return {
-    results,
-    saveResult,
-    deleteResult,
-    clearAll,
-    exportResults,
-    importResults,
   };
+
+  const downloadMarkdown = (result: SavedResult) => {
+    const blob = new Blob([`# ${result.tool.toUpperCase()}: ${result.topic}\n\n*Generated on ${new Date(result.timestamp).toLocaleString()} using ${result.model}*\n\n---\n\n${result.content}`], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${result.tool}-${result.topic.replace(/[^a-z0-9]/gi, '_').slice(0, 30)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return { results, isLoaded, saveResult, deleteResult, clearAll, downloadMarkdown };
 }
