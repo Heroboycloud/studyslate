@@ -7,6 +7,7 @@ export interface SavedResult {
   content: string;
   timestamp: number;
   model: string;
+  toolIcon?: string;
 }
 
 const STORAGE_KEY = 'studyslate_saved_results';
@@ -28,6 +29,14 @@ export function useSavedResults() {
   }, []);
 
   const saveResult = (tool: string, topic: string, content: string, model: string) => {
+    const toolIcons: Record<string, string> = {
+      'mnemonics': '🧠',
+      'keypoints': '📌',
+      'questions': '❓',
+      'flashcards': '🃏',
+      'simplify': '✨',
+    };
+    
     const newResult: SavedResult = {
       id: crypto.randomUUID(),
       tool,
@@ -35,8 +44,9 @@ export function useSavedResults() {
       content,
       timestamp: Date.now(),
       model,
+      toolIcon: toolIcons[tool] || '📚',
     };
-    
+
     const updated = [newResult, ...results];
     setResults(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
